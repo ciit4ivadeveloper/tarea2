@@ -5,26 +5,26 @@ const response = require('../../network/response')
 const routes = express.Router()
 
 routes.post('/', function(req, res){
-    controller.agregarRepresentante( req.body )
+    controller.agregarEmpresa( req.body )
         .then( (data) => response.success(req, res, data, 201) )
         .catch( (error) => response.error(req, res, error, 400) )
 })
 
 routes.get('/', function(req, res){
-    const filtro = req.query.ruc || null
-    controller.obtenerRepresentante( filtro )
+    const filtro = req.body || null
+    controller.obtenerEmpresa( filtro )
         .then( (data) => response.success(req, res, data, 200) )
-      
+        .catch( (error) => response.error(req, res, error, 400) )
 })
 
-routes.patch('/', function(req, res){
-    controller.actualizarRepresentante( req.body )
+routes.put('/', function(req, res){
+    controller.actualizarEmpresa( req.body )
         .then( (data) => response.success(req, res, data, 201) )
         .catch( (error) => response.error(req, res, error, 400) )
 })
 
 routes.delete('/', function(req, res){
-    controller.eliminarRepresentante( req.body )
+    controller.eliminarEmpresa( req.body )
         .then( (data) => response.success(req, res, data, 201) )
         .catch( (error) => response.error(req, res, error, 400) )
 })

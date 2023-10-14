@@ -1,72 +1,78 @@
-const model = require('./model')
+const Model = require('./model')
 
-function get_representantelegal( filtro_representantelegal ) {
+async function agregarRepresentante( dato ) {
+    const resultado = await new Model( dato )
+    return resultado.save()
+}
+
+async function obtenerRepresentante( filtro_ruc ) {
     return new Promise((resolve, reject) => {
         let filtro = {}
-        if (filtro_representantelegal) {
-            filtro = { ruc: filtro_representantelegal }
+        if (filtro_ruc) {
+            filtro = { ruc: filtro_ruc }
         }
-        model.find( filtro ) 
+        Model.find( filtro )            
             .populate({
-                path:'empresa',
+                path:'empresas',
+                populate:{
+                    path: 'empresa',
+                    model:'empresa'
+                }
             })
-
             .exec()
-            .then(data => { 
+            .then( data => {
                 lista = []
-                for (let elemento of data) {
-                    objeto = { 
-                        ruc:elemento.ruc,
-                        nombre:elemento.nombre,
-                        apellido:elemento.apellido,
-                        email:elemento.email,
-                        domicilio:elemento.domicilio,
-                        telefono:elemento.telefono, 
+                for (let elemento of data) { 
+                    objeto = {                   
+                        id:elemento._id,
+                        ruc: elemento.ruc,
+                        cedula: elemento.cedula,
+                        nombre: elemento.nombre,
+                        apellido: elemento.apellido,
+                        email: elemento.email,
+                        domicilio: elemento.domicilio,
+                        telefono: elemento.telefono                        
                     }
-                    objeto.detalles = []
-                    for (let detalle of elemento.empresa) {
+                    objeto.empresas = []
+                    for (let detalle of elemento.empresas) {
                         registro = { 
-                            rucEmpresa: detalle.ruc,
-                            nombreEmpresa:detalle.nombre,
-                            domicilioEmpresa:detalle.domicilio,
-                            telefonoEmpresa:detalle.telefono, 
+                            nombre: detalle.empresa.nombre,
+                            ruc: detalle.empresa.ruc                            
                         }
-                        objeto.detalles.push( registro )
+                        objeto.empresas.push( registro )
                     }
                     lista.push( objeto )
-                }
-                resolve(lista)
-                }) 
-                .catch(error => {
-                    reject(error)
-                  });   
+                }                
+                    resolve(lista)
+            } )
+            .catch (error => {
+                reject(error)
+            });         
     }) 
 }
 
-function add_representantelegal( representantelegal ) { 
 
-    const objeto = new model( representantelegal )
-    objeto.save()
+async function actualizarRepresentante(dato) {
+    const nuevo_objeto = await Model.findOne( { cedula: dato.cedula } )
+
+    nuevo_objeto.nombre = dato.nombre 
+    nuevo_objeto.apellido = dato.apellido
+    nuevo_objeto.email = dato.email 
+    nuevo_objeto.domicilio = dato.domicilio 
+    nuevo_objeto.telefono = dato.telefono 
+
+    const resultado = await nuevo_objeto.save()
+    return resultado
 }
 
-async function update_representantelegal( representantelegal ) {
-    const objeto = await model.findOne( {ruc: representantelegal.ruc} )
-
-    if ( objeto ) {
-        objeto.estado = False
-        return resultado = await objeto.save()
-    } else {
-        return null
-    }
-}
-
-async function delete_representantelegal( representantelegal ) {
-    return await model.deleteOne({ruc: representantelegal.ruc})
+async function eliminarRepresentante(dato) {
+    const resultado = await Model.deleteOne( {ruc: dato.ruc} )
+    return resultado
 }
 
 module.exports = {
-    add: add_representantelegal,
-    get: get_representantelegal,
-    update: update_representantelegal,
-    delete: delete_representantelegal
+    agregar:agregarRepresentante,
+    obtener:obtenerRepresentante,
+    actualizar:actualizarRepresentante,
+    eliminar:eliminarRepresentante
 }
