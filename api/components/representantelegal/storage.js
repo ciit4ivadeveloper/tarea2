@@ -10,7 +10,9 @@ function get_representantelegal( filtro_representantelegal ) {
             .populate({
                 path:'empresa',
             })
-            .exec( (error, data) => {
+
+            .exec()
+            .then(data => { 
                 lista = []
                 for (let elemento of data) {
                     objeto = { 
@@ -33,11 +35,11 @@ function get_representantelegal( filtro_representantelegal ) {
                     }
                     lista.push( objeto )
                 }
-                if (error)
+                resolve(lista)
+                }) 
+                .catch(error => {
                     reject(error)
-                else 
-                    resolve(lista)
-            } )
+                  });   
     }) 
 }
 
